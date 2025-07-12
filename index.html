@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Diagnostics: The Breakdown Dilemma</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .game-container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .game-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .main-symptom {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #34495e;
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .component-grid, .diagnosis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .component-button, .diagnosis-button {
+            background-color: #3498db;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, opacity 0.3s ease;
+            border: none;
+            outline: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .component-button:hover:not(.investigated) {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        .component-button.investigated {
+            background-color: #95a5a6;
+            opacity: 0.8;
+            cursor: default;
+            box-shadow: none;
+        }
+        .diagnosis-button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        .diagnosis-button.selected {
+            background-color: #27ae60;
+            box-shadow: 0 0 15px rgba(39, 174, 96, 0.5);
+        }
+        .diagnostic-observations {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 100px;
+            text-align: left;
+            color: #34495e;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .diagnostic-observations ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+        .diagnostic-observations li {
+            margin-bottom: 5px;
+        }
+        .action-buttons button {
+            background-color: #f39c12;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            border: none;
+            outline: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 0 10px;
+        }
+        .action-buttons button:hover {
+            background-color: #e67e22;
+            transform: translateY(-2px);
+        }
+        .action-buttons button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+        .message-box {
+            background-color: #ffeaa7;
+            color: #d35400;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 15px;
+            display: none; /* Hidden by default */
+        }
+        .message-box.show {
+            display: block;
+        }
+        .message-box.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .message-box.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .score-display {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-top: 10px;
+        }
+        .final-game-message {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #27ae60;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">Car Diagnostics: The Breakdown Dilemma</h1>
+
+        <div class="main-symptom" id="mainSymptom"></div>
+
+        <h2 class="section-title">Investigate Components:</h2>
+        <div class="component-grid" id="componentGrid"></div>
+
+        <h2 class="section-title">Diagnostic Observations:</h2>
+        <div class="diagnostic-observations" id="diagnosticObservations">
+            <p>Click on a component above to reveal diagnostic clues.</p>
+        </div>
+
+        <h2 class="section-title">Your Diagnosis:</h2>
+        <div class="diagnosis-grid" id="diagnosisGrid"></div>
+
+        <div class="message-box" id="messageBox"></div>
+
+        <div class="action-buttons">
+            <button id="submitDiagnosisBtn" disabled>Submit Diagnosis</button>
+            <button id="nextProblemBtn" disabled>Next Problem</button>
+            <button id="restartGameBtn">Restart Game</button>
+        </div>
+
+        <div class="score-display" id="scoreDisplay">Score: 0</div>
+        <div class="final-game-message" id="finalGameMessage"></div>
+    </div>
+
+    <script>
+        // Data structure for car problems
+        const carProblems = [
+            {
+                mainSymptom: "The car won't start, and there's no sound at all when you turn the key.",
+                components: [
+                    { name: "Battery", clues: ["Headlights are very dim or completely off.", "No dashboard lights illuminate.", "No clicking sound from the engine compartment."] },
+                    { name: "Starter Motor", clues: ["You hear a single click or a series of rapid clicks, but the engine doesn't turn over.", "Battery seems to be low.(no lights)."] },
+                    { name: "Ignition Switch", clues: ["Key turns, but nothing happens at all (no lights, no sounds).", "No power to accessories (radio, windows)."] }
+                ],
+                correctProblem: "Battery",
+                diagnosisOptions: ["Battery", "Starter Motor", "Ignition Switch", "Alternator", "Fuel Pump"],
+                solution: "Check battery charge, clean terminals, or replace the battery. A dead battery is the most common cause."
+            },
+            {
+                mainSymptom: "The engine cranks strongly, but it just won't catch and start.",
+                components: [
+                    { name: "Fuel Pump", clues: ["You don't hear the usual faint hum from the rear of the car when you turn the key to 'on'.", "There's no smell of fuel from the exhaust.", "Engine cranks endlessly without firing."] },
+                    { name: "Spark Plugs", clues: ["Engine misfires or idles roughly if it briefly catches.", "Exhaust smells of unburnt fuel.", "Engine struggles to ignite fuel."] },
+                    { name: "Air Filter", clues: ["Engine feels sluggish, especially under acceleration.", "Fuel economy has worsened over time.", "Visible dirt or debris on the air filter."] }
+                ],
+                correctProblem: "Fuel Pump",
+                diagnosisOptions: ["Fuel Pump", "Spark Plugs", "Air Filter", "Battery", "Brake Pads"],
+                solution: "Check the fuel pump fuse/relay, or the fuel pump itself. Ensure fuel is reaching the engine."
+            },
+            {
+                mainSymptom: "You hear a loud, high-pitched squealing noise every time you apply the brakes.",
+                components: [
+                    { name: "Brake Pads", clues: ["The noise is consistent and happens every time you brake.", "The brake pedal feels normal, not spongy or hard.", "Visual inspection shows brake pads are thin."] },
+                    { name: "Brake Rotor", clues: ["You feel a pulsation or vibration in the brake pedal when braking.", "The steering wheel might shake during braking.", "Visible grooves or uneven wear on the rotor surface."] },
+                    { name: "Wheel Bearing", clues: ["The noise changes with vehicle speed, even when not braking (e.g., a hum or growl).", "The noise might get louder when turning.", "Wheel feels loose when jacked up and wiggled."] }
+                ],
+                correctProblem: "Brake Pads",
+                diagnosisOptions: ["Brake Pads", "Brake Rotor", "Wheel Bearing", "Tires", "Suspension"],
+                solution: "The brake pads are worn out and need replacement. The squealing is often caused by a wear indicator."
+            },
+            {
+                mainSymptom: "The engine is overheating, and the temperature gauge is in the red.",
+                components: [
+                    { name: "Coolant Level", clues: ["The coolant reservoir is empty or very low.", "No visible leaks around hoses or radiator.", "Engine quickly heats up after starting."] },
+                    { name: "Radiator Fan", clues: ["The cooling fan does not turn on when the engine gets hot.", "You don't hear the fan running when the AC is on.", "Engine overheats primarily in stop-and-go traffic."] },
+                    { name: "Thermostat", clues: ["Engine takes a very long time to warm up, or it overheats quickly and then cools down.", "Hoses leading to/from the radiator might feel cold even when the engine is hot."] }
+                ],
+                correctProblem: "Coolant Level",
+                diagnosisOptions: ["Coolant Level", "Radiator Fan", "Thermostat", "Water Pump", "Head Gasket"],
+                solution: "Check and refill the coolant. Look for leaks and address them. Low coolant is a common cause of overheating."
+            },
+            {
+                mainSymptom: "The steering feels loose, and the car wanders on the road.",
+                components: [
+                    { name: "Tire Pressure", clues: ["One or more tires look visibly low on air.", "The car pulls to one side.", "Check tire pressure with a gauge – it's significantly off."] },
+                    { name: "Tie Rod Ends", clues: ["You hear clunking or popping noises when turning or going over bumps.", "Excessive play when wiggling the wheel side-to-side (with car jacked up).", "Uneven tire wear on the edges."] },
+                    { name: "Power Steering Fluid", clues: ["The steering wheel is hard to turn, especially at low speeds.", "You hear a whining noise when turning the wheel.", "The power steering fluid reservoir is low or empty."] }
+                ],
+                correctProblem: "Tie Rod Ends",
+                diagnosisOptions: ["Tire Pressure", "Tie Rod Ends", "Power Steering Fluid", "Alignment", "Shocks/Struts"],
+                solution: "Worn tie rod ends can cause loose steering and wandering. They need to be inspected and replaced."
+            }
+        ];
+
+        let currentProblemIndex = 0;
+        let score = 0;
+        let selectedDiagnosis = null;
+        let problemSolved = false;
+
+        const mainSymptomEl = document.getElementById('mainSymptom');
+        const componentGridEl = document.getElementById('componentGrid');
+        const diagnosticObservationsEl = document.getElementById('diagnosticObservations');
+        const diagnosisGridEl = document.getElementById('diagnosisGrid');
+        const messageBoxEl = document.getElementById('messageBox');
+        const submitDiagnosisBtn = document.getElementById('submitDiagnosisBtn');
+        const nextProblemBtn = document.getElementById('nextProblemBtn');
+        const restartGameBtn = document.getElementById('restartGameBtn');
+        const scoreDisplayEl = document.getElementById('scoreDisplay');
+        const finalGameMessageEl = document.getElementById('finalGameMessage');
+
+        // Function to display a message in the message box
+        function showMessage(message, type = 'info') {
+            messageBoxEl.textContent = message;
+            messageBoxEl.className = `message-box show ${type}`; // Add type class for styling
+        }
+
+        // Function to hide the message box
+        function hideMessage() {
+            messageBoxEl.classList.remove('show', 'success', 'error');
+        }
+
+        // Function to render the current car problem
+        function renderProblem() {
+            hideMessage();
+            problemSolved = false;
+            selectedDiagnosis = null;
+            submitDiagnosisBtn.disabled = true;
+            nextProblemBtn.disabled = true;
+            finalGameMessageEl.style.display = 'none';
+
+            const currentProblem = carProblems[currentProblemIndex];
+            mainSymptomEl.textContent = currentProblem.mainSymptom;
+            diagnosticObservationsEl.innerHTML = '<p>Click on a component above to reveal diagnostic clues.</p>'; // Reset observations
+
+            // Render component buttons
+            componentGridEl.innerHTML = '';
+            currentProblem.components.forEach(component => {
+                const button = document.createElement('button');
+                button.textContent = component.name;
+                button.classList.add('component-button');
+                button.dataset.componentName = component.name;
+                button.addEventListener('click', () => investigateComponent(component.name));
+                componentGridEl.appendChild(button);
+            });
+
+            // Render diagnosis options
+            diagnosisGridEl.innerHTML = '';
+            currentProblem.diagnosisOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('diagnosis-button');
+                button.dataset.diagnosis = option;
+                button.addEventListener('click', () => selectDiagnosis(option));
+                diagnosisGridEl.appendChild(button);
+            });
+
+            updateScoreDisplay();
+        }
+
+        // Function to investigate a component and show clues
+        function investigateComponent(componentName) {
+            const currentProblem = carProblems[currentProblemIndex];
+            const component = currentProblem.components.find(comp => comp.name === componentName);
+
+            if (component) {
+                // Mark button as investigated
+                const button = componentGridEl.querySelector(`[data-component-name="${componentName}"]`);
+                if (button && !button.classList.contains('investigated')) {
+                    button.classList.add('investigated');
+                }
+
+                // Display clues
+                diagnosticObservationsEl.innerHTML = `<h3>Observations for ${component.name}:</h3><ul>`;
+                component.clues.forEach(clue => {
+                    diagnosticObservationsEl.innerHTML += `<li>${clue}</li>`;
+                });
+                diagnosticObservationsEl.innerHTML += '</ul>';
+            }
+        }
+
+        // Function to select a diagnosis
+        function selectDiagnosis(diagnosis) {
+            selectedDiagnosis = diagnosis;
+            // Remove 'selected' class from all buttons
+            diagnosisGridEl.querySelectorAll('.diagnosis-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            // Add 'selected' class to the clicked button
+            const selectedBtn = diagnosisGridEl.querySelector(`[data-diagnosis="${diagnosis}"]`);
+            if (selectedBtn) {
+                selectedBtn.classList.add('selected');
+            }
+            submitDiagnosisBtn.disabled = false; // Enable submit button once a diagnosis is selected
+            hideMessage(); // Hide any previous messages
+        }
+
+        // Event listener for Submit Diagnosis button
+        submitDiagnosisBtn.addEventListener('click', () => {
+            if (problemSolved) return; // Prevent re-submitting
+
+            if (!selectedDiagnosis) {
+                showMessage("Please select a diagnosis before submitting.", 'error');
+                return;
+            }
+
+            const currentProblem = carProblems[currentProblemIndex];
+            if (selectedDiagnosis === currentProblem.correctProblem) {
+                score += 10; // Award points for correct diagnosis
+                showMessage(`Correct! The problem is: ${currentProblem.correctProblem}. Solution: ${currentProblem.solution}`, 'success');
+                problemSolved = true;
+                nextProblemBtn.disabled = false; // Enable next problem button
+                submitDiagnosisBtn.disabled = true; // Disable submit after correct answer
+                // Disable all component investigation buttons
+                componentGridEl.querySelectorAll('.component-button').forEach(btn => {
+                    btn.classList.add('investigated'); // Visually mark as investigated/disabled
+                    btn.removeEventListener('click', investigateComponent); // Remove event listener
+                });
+                diagnosisGridEl.querySelectorAll('.diagnosis-button').forEach(btn => {
+                    btn.removeEventListener('click', selectDiagnosis); // Prevent changing diagnosis
+                });
+
+            } else {
+                score = Math.max(0, score - 5); // Deduct points for incorrect diagnosis
+                showMessage(`Incorrect diagnosis. The problem is NOT ${selectedDiagnosis}. Try again!`, 'error');
+                // Allow user to keep investigating and re-diagnosing
+            }
+            updateScoreDisplay();
+        });
+
+        // Event listener for Next Problem button
+        nextProblemBtn.addEventListener('click', () => {
+            currentProblemIndex++;
+            if (currentProblemIndex < carProblems.length) {
+                renderProblem();
+            } else {
+                // Game over
+                finalGameMessageEl.textContent = `You've completed all car diagnostic problems! Your final score is ${score}.`;
+                finalGameMessageEl.style.display = 'block';
+                submitDiagnosisBtn.disabled = true;
+                nextProblemBtn.disabled = true;
+                componentGridEl.innerHTML = ''; // Clear components
+                diagnosisGridEl.innerHTML = ''; // Clear diagnosis options
+                diagnosticObservationsEl.innerHTML = '<p>Game Over!</p>';
+                hideMessage();
+            }
+        });
+
+        // Event listener for Restart Game button
+        restartGameBtn.addEventListener('click', () => {
+            currentProblemIndex = 0;
+            score = 0;
+            renderProblem();
+        });
+
+        // Function to update the score display
+        function updateScoreDisplay() {
+            scoreDisplayEl.textContent = `Score: ${score}`;
+        }
+
+        // Initial render of the first problem
+        renderProblem();
+    </script>
+</body>
+</html>
